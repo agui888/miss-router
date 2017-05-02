@@ -1,5 +1,9 @@
+-- Copyright © 2017 coord.cn. All rights reserved.
+-- @author      QianYe(coordcn@163.com)
+-- @license     MIT license
+
 local core      = require("miss-core")
-local Object    = core.object
+local Object    = core.Object
 local utils     = core.utils
 
 local STAR      = 42
@@ -71,12 +75,23 @@ local Router = Object:extend()
 --      params          = {},
 -- }
 
+-- @param       limit   {number} input path length limit
 function Router:constructor(limit)
         self.limit = limit
         self.max = 0
         self.root = {} 
 end
 
+-- @brief       add new router path and handler
+-- @param       method  {string}        GET POST
+-- @param       path    {string}        static first, if match static path params path will be ignored
+--              /                       root
+--              /logs/user/name/test    static
+--              /logs/:user/:name/test  params
+--              /logs/*                 group
+-- @param       handler {function}      if the handler return false, stop execute handler chain
+--              function(request, response)
+--              end
 function Router:add(method, path, handler)
         if type(method) ~= "string" then
                 error("method must be string")
@@ -142,10 +157,8 @@ function Router:add(method, path, handler)
         end
 end
 
-local find
-find = function(node, method, keys, index, len, results)
-end
-
+-- @param       method  {string}        GET POST
+-- @param       path    {string}        static first, if match static path params path will be ignored
 function Router:find(method, path)
         local node = self.root
         if path == "/" then
@@ -220,6 +233,44 @@ function Router:find(method, path)
                 end
 
                 node = temp
+        end
+end
+
+-- @brief       execute handlers
+-- @param       before          {table[array(function)]}
+-- @param       handlers        {table[array(array)]
+-- @param       after           {table[array(function)]}
+-- @param       req             {object}        request
+-- @param       res             {object}        response
+function Router.execute(before, handlers, after, req, res)
+        if type(before) == "table" then
+                for i = 1, #before do
+                        local ret = before[i](req, res)
+                        if ret == false then
+                                return
+                        end
+                end
+        end
+
+        if type(handlers) == "table" then
+                for i = 1, #handlers do
+                        local handler = handlers[i]
+                        for j = 1, #handler do
+                                local ret = handler[j](req, res)
+                                if ret == false then
+                                        return
+                                end
+                        end
+                end
+        end
+
+        if type(after) == "table" then
+                for i = 1, #after do
+                        local ret = after[i](req, res)
+                        if ret == false then
+                                return
+                        end
+                end
         end
 end
 
