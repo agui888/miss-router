@@ -5,9 +5,9 @@
 local _M = {}
 
 -- @brief       execute handlers
--- @param       before          {table[array(function)]}
--- @param       handlers        {table[array(array)]
--- @param       after           {table[array(function)]}
+-- @param       before          {array[function]}
+-- @param       handlers        {array[array(function)]}
+-- @param       after           {array[function]}
 -- @param       req             {object}        request
 -- @param       res             {object}        response
 function _M.execute(before, handlers, after, req, res)
