@@ -188,6 +188,13 @@ function Router:find(method, path)
 
     local handlers = {}
     for i = 1, len do
+        if node.starHandlersMap then
+            local starHandlers = node.starHandlersMap[method]
+            if starHandlers then
+                table.insert(handlers, starHandlers)
+            end
+        end
+
         local key = keys[i]
         local temp
         if node.staticChildren then
@@ -224,13 +231,6 @@ function Router:find(method, path)
                 return handlers, ret
             else
                 return handlers
-            end
-        else
-            if node.starHandlersMap then
-                local starHandlers = node.starHandlersMap[method]
-                if starHandlers then
-                    table.insert(handlers, starHandlers)
-                end
             end
         end
 
